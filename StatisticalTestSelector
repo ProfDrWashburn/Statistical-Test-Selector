@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Statistical Test Selector for EBP and QI Projects</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f4eee1;
+    --surface:#fffdf7;
+    --surface-2:#f7f1e4;
+    --ink:#22303a;
+    --ink-soft:#4b5a63;
+    --teal:#1f6f6a;
+    --teal-deep:#15524e;
+    --teal-tint:#e3efed;
+    --clay:#c2683f;
+    --clay-tint:#f6e6dc;
+    --line:#d8cdb8;
+    --gold:#a9852f;
+    --shadow:0 10px 30px rgba(34,48,58,.10);
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:"Karla",-apple-system,BlinkMacSystemFont,sans-serif;
+    line-height:1.55;font-size:17px;
+    background-image:radial-gradient(circle at 12% 8%, rgba(31,111,106,.05), transparent 45%),radial-gradient(circle at 88% 0%, rgba(194,104,63,.05), transparent 40%);
+  }
+  h1,h2,h3,h4{font-family:"Fraunces",Georgia,serif;font-weight:600;line-height:1.15;margin:0}
+  .wrap{max-width:1020px;margin:0 auto;padding:0 22px 80px}
+
+  header.masthead{
+    padding:46px 22px 30px;text-align:center;
+    background:linear-gradient(180deg,var(--teal-deep),var(--teal));
+    color:#fdfaf2;border-bottom:5px solid var(--gold);
+  }
+  header.masthead .kicker{font-size:13px;letter-spacing:.22em;text-transform:uppercase;opacity:.85;font-weight:600}
+  header.masthead h1{font-size:clamp(28px,5vw,44px);margin:10px auto 8px;max-width:760px;color:#fff}
+  header.masthead p{margin:0 auto;max-width:640px;opacity:.92;font-size:16px}
+
+  .notice{
+    max-width:1020px;margin:-18px auto 0;background:var(--clay-tint);
+    border:1px solid #e7c6b2;border-left:5px solid var(--clay);
+    border-radius:12px;padding:16px 20px;box-shadow:var(--shadow);position:relative;
+  }
+  .notice strong{color:var(--clay);font-weight:700}
+  .notice p{margin:6px 0 0;font-size:15.5px;color:var(--ink-soft)}
+
+  nav.tabs{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:30px auto 26px;max-width:1020px}
+  nav.tabs button{
+    font-family:"Karla",sans-serif;font-weight:600;font-size:15px;cursor:pointer;
+    background:var(--surface);color:var(--ink-soft);border:1px solid var(--line);
+    padding:10px 18px;border-radius:999px;transition:.18s;
+  }
+  nav.tabs button:hover{color:var(--teal);border-color:var(--teal)}
+  nav.tabs button.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+
+  .panel{display:none;animation:fade .35s ease}
+  .panel.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 28px;margin:0 0 22px}
+  .step-label{display:inline-block;font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:8px}
+  .card h2{font-size:24px;margin-bottom:6px}
+  .card .lead{color:var(--ink-soft);font-size:16px;margin:0 0 18px}
+
+  .opts{display:grid;gap:12px;grid-template-columns:1fr}
+  @media(min-width:640px){.opts.two{grid-template-columns:1fr 1fr}}
+  .opt{
+    text-align:left;cursor:pointer;background:var(--surface-2);border:1.5px solid var(--line);
+    border-radius:12px;padding:15px 17px;font-family:inherit;font-size:16px;color:var(--ink);
+    transition:.16s;display:block;width:100%;
+  }
+  .opt:hover{border-color:var(--teal);background:#fff;transform:translateY(-1px)}
+  .opt.selected{border-color:var(--teal);background:var(--teal-tint);box-shadow:0 0 0 3px rgba(31,111,106,.12)}
+  .opt .ot{font-weight:700;display:block;margin-bottom:2px}
+  .opt .od{font-size:14px;color:var(--ink-soft);line-height:1.4}
+
+  .crumbs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}
+  .crumb{background:var(--teal-tint);color:var(--teal-deep);border:1px solid #bcd9d5;font-size:13px;font-weight:600;padding:5px 11px;border-radius:999px}
+  .crumb b{font-weight:700}
+
+  .btn-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+  .btn{font-family:"Karla",sans-serif;font-weight:600;font-size:15px;cursor:pointer;border-radius:10px;padding:11px 20px;border:1.5px solid var(--teal);background:var(--teal);color:#fff;transition:.16s}
+  .btn:hover{background:var(--teal-deep);border-color:var(--teal-deep)}
+  .btn.ghost{background:transparent;color:var(--teal)}
+  .btn.ghost:hover{background:var(--teal-tint)}
+
+  /* result */
+  .result-head{background:linear-gradient(135deg,var(--teal),var(--teal-deep));color:#fff;border-radius:14px;padding:22px 24px;margin-bottom:18px}
+  .result-head .rk{font-size:12.5px;letter-spacing:.18em;text-transform:uppercase;opacity:.85;font-weight:700}
+  .result-head h2{color:#fff;font-size:28px;margin:6px 0 4px}
+  .result-head .rsub{opacity:.92;font-size:15.5px}
+  .rgrid{display:grid;gap:16px;grid-template-columns:1fr}
+  @media(min-width:680px){.rgrid{grid-template-columns:1fr 1fr}}
+  .rbox{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .rbox h4{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--clay);margin-bottom:7px;font-family:"Karla";font-weight:700}
+  .rbox p{margin:0;font-size:15.5px}
+  .rbox .big{font-family:"Fraunces";font-size:21px;font-weight:600;color:var(--ink);display:block;margin-bottom:3px}
+  .pill{display:inline-block;background:var(--teal-tint);color:var(--teal-deep);font-size:13px;font-weight:600;padding:3px 10px;border-radius:999px;margin:3px 5px 0 0}
+  .reportlist{margin:8px 0 0;padding-left:18px}
+  .reportlist li{margin:4px 0;font-size:15px}
+
+  .warnbox{background:var(--clay-tint);border:1px solid #e7c6b2;border-left:5px solid var(--clay);border-radius:10px;padding:14px 16px;margin-top:16px;font-size:15px;color:var(--ink-soft)}
+  .warnbox b{color:var(--clay)}
+
+  /* matrix table */
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+  table{border-collapse:collapse;width:100%;min-width:720px;background:var(--surface);font-size:14.5px}
+  caption{caption-side:top;text-align:left;font-family:"Fraunces";font-weight:600;font-size:18px;padding:14px 16px 8px;color:var(--ink)}
+  th,td{border:1px solid var(--line);padding:11px 13px;vertical-align:top;text-align:left}
+  thead th{background:var(--teal);color:#fff;font-weight:600;position:sticky;top:0}
+  tbody th{background:var(--teal-tint);color:var(--teal-deep);font-weight:700;font-size:14px;width:150px}
+  td .test{font-weight:700;color:var(--ink)}
+  td .alt{display:block;font-size:13px;color:var(--ink-soft);margin-top:3px}
+  tbody tr:nth-child(even) td{background:#fbf7ee}
+
+  .glossary dt{font-family:"Fraunces";font-weight:600;font-size:18px;color:var(--teal-deep);margin-top:18px}
+  .glossary dd{margin:5px 0 0;color:var(--ink-soft)}
+
+  .refs{counter-reset:none}
+  .refs p{padding-left:34px;text-indent:-34px;margin:0 0 14px;font-size:15px;color:var(--ink-soft)}
+  .refs a{color:var(--teal)}
+  .about p{color:var(--ink-soft)}
+  .about h3{margin:22px 0 6px;color:var(--ink);font-size:20px}
+
+  footer{text-align:center;color:var(--ink-soft);font-size:13.5px;padding:20px;border-top:1px solid var(--line);margin-top:30px}
+
+  .hidden{display:none}
+  textarea.summary{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:16px 18px;font-family:"Karla",sans-serif;font-size:15.5px;line-height:1.6;color:var(--ink);background:#fffdf7;resize:vertical;min-height:220px}
+  textarea.summary:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(31,111,106,.12)}
+  .term{border-bottom:1.5px dotted var(--teal);cursor:help}
+  .term:hover{color:var(--teal-deep)}
+  .tip{position:fixed;max-width:288px;background:var(--ink);color:#fdfaf2;padding:11px 14px;border-radius:10px;font-size:13.5px;line-height:1.5;box-shadow:0 12px 32px rgba(0,0,0,.28);z-index:2000;pointer-events:none;font-family:"Karla",sans-serif}
+  .termhint{font-size:13.5px;color:var(--ink-soft);margin:0 0 18px;font-style:italic}
+  @media print{
+    nav.tabs,.btn-row,.notice{display:none}
+    .panel{display:block !important}
+    body{background:#fff}
+    .card{box-shadow:none;break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="kicker">MSN and DNP Practice Improvement Projects</div>
+  <h1>Statistical Test Selector for EBP and QI Projects</h1>
+  <p>A guided decision aid that walks you through your project, defines terms along the way, and points you to the simplest defensible design and analysis.</p>
+</header>
+
+<div class="notice">
+  <strong>Read this first.</strong>
+  <p>EBP and QI projects are local practice improvement work, not generalizable research. The goal is to improve care in one setting, not to produce findings meant to apply everywhere. That is why most of these projects are determined non-research or IRB exempt, and why the analysis should stay as simple as the question allows. Choose the plainest method that answers your aim. Often a clear set of descriptive statistics, or a run chart, is enough.</p>
+</div>
+
+<nav class="tabs">
+  <button class="active" data-tab="tool">Guided Tool</button>
+  <button data-tab="matrix">Reference Matrix</button>
+  <button data-tab="glossary">Glossary</button>
+  <button data-tab="about">About and References</button>
+</nav>
+
+<div class="wrap">
+
+  <!-- ============ GUIDED TOOL ============ -->
+  <section class="panel active" id="tool">
+    <div id="crumbs" class="crumbs"></div>
+    <div id="steps"></div>
+    <div class="btn-row" style="margin-top:4px">
+      <button class="btn ghost" id="restart">Start over</button>
+      <button class="btn ghost" id="back" style="display:none">Back one step</button>
+    </div>
+  </section>
+
+  <!-- ============ MATRIX ============ -->
+  <section class="panel" id="matrix">
+    <div class="card">
+      <span class="step-label">Quick reference</span>
+      <h2>Test selection matrix</h2>
+      <p class="lead">Find the row for your outcome measure, then the column for how your project is structured. The bold entry is the simplest defensible test. The lighter entry is the alternative to use when a continuous outcome is markedly skewed or your sample is small (roughly under 30), or when your outcome is ordinal.</p>
+      <div class="tablewrap">
+        <table>
+          <caption>Comparing outcomes before and after, or between groups</caption>
+          <thead>
+            <tr>
+              <th>Outcome measure (your dependent variable)</th>
+              <th>One group, before vs after (paired)</th>
+              <th>Two separate groups</th>
+              <th>Three or more time points or groups</th>
+              <th>Compare to a fixed target or benchmark</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Continuous<br><span style="font-weight:400;font-size:12.5px;color:var(--ink-soft)">e.g., HbA1c, blood pressure, weight, length of stay, a summed scale score</span></th>
+              <td><span class="test">Paired-samples t test</span><span class="alt">Skewed or small n: Wilcoxon signed-rank test</span></td>
+              <td><span class="test">Independent-samples t test</span><span class="alt">Skewed or small n: Mann-Whitney U test</span></td>
+              <td><span class="test">One-way ANOVA (groups) or repeated-measures ANOVA (time points)</span><span class="alt">Skewed or small n: Kruskal-Wallis or Friedman test</span></td>
+              <td><span class="test">One-sample t test</span></td>
+            </tr>
+            <tr>
+              <th>Categorical, two outcomes<br><span style="font-weight:400;font-size:12.5px;color:var(--ink-soft)">e.g., compliant yes or no, readmitted yes or no, fall yes or no</span></th>
+              <td><span class="test">McNemar test</span><span class="alt">Same patients counted as yes or no at two times</span></td>
+              <td><span class="test">Chi-square test of independence</span><span class="alt">Small expected counts (any cell under 5): Fisher exact test</span></td>
+              <td><span class="test">Chi-square test</span></td>
+              <td><span class="test">One-sample proportion test or binomial test</span></td>
+            </tr>
+            <tr>
+              <th>Ordinal<br><span style="font-weight:400;font-size:12.5px;color:var(--ink-soft)">e.g., a single Likert item, satisfaction 1 to 5, pain stage</span></th>
+              <td><span class="test">Wilcoxon signed-rank test</span></td>
+              <td><span class="test">Mann-Whitney U test</span></td>
+              <td><span class="test">Kruskal-Wallis (groups) or Friedman (time points)</span></td>
+              <td><span class="test">Compare to target with descriptive medians, sign test if needed</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tablewrap">
+        <table>
+          <caption>Tracking a measure over many time points (the usual choice for QI)</caption>
+          <thead>
+            <tr><th>Situation</th><th>Recommended display</th><th>What it tells you</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Just starting, few data points</th>
+              <td><span class="test">Run chart</span><span class="alt">Plot each point over time against a median centerline</span></td>
+              <td>Whether a real shift, trend, or run has appeared, using probability-based rules, without needing many points</td>
+            </tr>
+            <tr>
+              <th>Roughly 15 to 20 or more time points</th>
+              <td><span class="test">Control chart (SPC or Shewhart chart)</span><span class="alt">p-chart for a proportion, c-chart or u-chart for counts and rates, I-chart for individual continuous values</span></td>
+              <td>Whether variation is normal background noise (common cause) or a real signal tied to your change (special cause), using control limits</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="warnbox" style="margin-top:18px"><b>Why charts often beat a single before-and-after test in QI.</b> A run chart or control chart shows whether your improvement actually held over time and separates a true change from ordinary fluctuation. A one-time pre and post test cannot do either. Many strong QI projects report no p value at all.</div>
+    </div>
+
+    <div class="card">
+      <div class="tablewrap">
+        <table>
+          <caption>Choosing a design for a practice project</caption>
+          <thead>
+            <tr><th>Design</th><th>What it means</th><th>Typical analysis</th><th>Research or non-research</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Descriptive</th>
+              <td>Observe and summarize one group, no comparison group and no manipulation</td>
+              <td>Descriptive statistics, frequencies, simple charts</td>
+              <td>Almost always non-research</td>
+            </tr>
+            <tr>
+              <th>One-group pretest-posttest (pre-experimental)</th>
+              <td>One group measured before and after a change, no comparison group. The most common practice-project design</td>
+              <td>Paired t test, Wilcoxon signed-rank, or McNemar, depending on the outcome type</td>
+              <td>Usually non-research or exempt</td>
+            </tr>
+            <tr>
+              <th>Interrupted time series (quasi-experimental)</th>
+              <td>The outcome measured repeatedly before and after a change, watching for a sustained shift</td>
+              <td>Run chart, then control chart as data accumulate</td>
+              <td>Usually non-research, well suited to QI</td>
+            </tr>
+            <tr>
+              <th>Nonequivalent comparison group (quasi-experimental)</th>
+              <td>An intervention group compared with a separate group that was not randomly assigned</td>
+              <td>Independent-samples t test, Mann-Whitney, or chi-square, depending on the outcome type</td>
+              <td>Often non-research, but confirm with your IRB</td>
+            </tr>
+            <tr>
+              <th>Experimental (randomized controlled trial)</th>
+              <td>Random assignment to intervention or comparison, plus a control group</td>
+              <td>The same comparison tests, with randomization supporting stronger causal claims</td>
+              <td>Usually research, requires full IRB review</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="warnbox" style="margin-top:18px;background:var(--teal-tint);border-color:#bcd9d5;border-left-color:var(--teal);color:var(--ink-soft)"><b>Reading the table.</b> Designs near the top are simpler and almost always non-research. As you move down, the design gets stronger but also more demanding, and randomization at the bottom usually tips a project into research. For most EBP and QI work, one of the first three rows is the right home.</div>
+    </div>
+  </section>
+
+  <!-- ============ GLOSSARY ============ -->
+  <section class="panel" id="glossary">
+    <div class="card glossary">
+      <span class="step-label">Plain-language definitions</span>
+      <h2>Glossary</h2>
+      <dl>
+        <dt>EBP, QI, and research</dt>
+        <dd>Evidence-based practice puts existing best evidence into local practice. Quality improvement uses data to make immediate improvements to a local process or outcome. Research is a systematic investigation designed to create knowledge meant to generalize beyond your setting. Only the last one routinely requires full IRB review. The intent to publish does not by itself turn a QI project into research, and the final determination is made by your IRB or institution, not by you.</dd>
+
+        <dt>Study designs, from simplest to strongest</dt>
+        <dd>A descriptive design summarizes one group with no comparison. A one-group pretest-posttest design (pre-experimental) measures one group before and after a change, which is simple but cannot rule out other causes. A quasi-experimental design adds a comparison, either a separate nonrandomized group or repeated measures over time (interrupted time series), without random assignment. A true experiment (randomized controlled trial) adds random assignment and a control group, which strengthens causal claims but usually makes the project research. Practice projects almost always sit in the first three.</dd>
+
+        <dt>Dependent and independent variable</dt>
+        <dd>Your dependent variable is the outcome you measure, such as fall rate or HbA1c. Your independent variable is what you think influences it, usually your intervention or group. The data type of your dependent variable drives most of the test choice.</dd>
+
+        <dt>Levels of measurement</dt>
+        <dd>Continuous data are numbers on a real scale where the distance between values is meaningful, such as weight or blood pressure. Categorical data sort cases into named groups with no order, such as yes or no. Ordinal data have an order but uneven or unknown spacing, such as a 1 to 5 satisfaction rating.</dd>
+
+        <dt>Paired versus independent</dt>
+        <dd>Paired data come from the same people measured twice, such as before and after, so each before value links to one after value. Independent data come from two separate sets of people, such as a unit that got the intervention and a unit that did not.</dd>
+
+        <dt>Parametric versus nonparametric</dt>
+        <dd>Parametric tests, such as the t test, assume the outcome is continuous and reasonably normally distributed, and they compare means. Nonparametric tests, such as Wilcoxon or Mann-Whitney, make fewer assumptions, compare ranks or medians, and are the safer choice with small samples or skewed data.</dd>
+
+        <dt>Descriptive versus inferential statistics</dt>
+        <dd>Descriptive statistics summarize what happened in your sample, such as means, percentages, and frequencies. Inferential statistics, such as t tests and chi-square, estimate whether a difference is likely more than chance. Many EBP and QI projects are answered well by descriptive statistics alone.</dd>
+
+        <dt>Common cause and special cause variation</dt>
+        <dd>Common cause variation is the normal up and down noise present in any stable process. Special cause variation is a signal that something real changed. Run charts and control charts exist to tell these two apart.</dd>
+
+        <dt>p value, confidence interval, and effect size</dt>
+        <dd>A p value estimates how surprising your result would be if nothing really changed. A confidence interval gives a plausible range for the true difference. An effect size, such as Cohen d, says how large the difference is in practical terms. With small samples, report the confidence interval and effect size, not just the p value, because a real and useful change can still miss statistical significance.</dd>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ============ ABOUT ============ -->
+  <section class="panel" id="about">
+    <div class="card about">
+      <span class="step-label">How to use this aid</span>
+      <h2>About this tool</h2>
+      <p>This aid is for you as you plan the analysis for your MSN or DNP practice improvement project. It deliberately steers toward the simplest defensible method, because these projects answer focused local questions, usually with modest sample sizes. Use it to think through your design and analysis. It is a starting point, not a substitute for your own judgment, your statistics resources, your project chair, or your institution's determination process. Every underlined term carries a plain-language definition, so tap or hover anything you do not remember.</p>
+
+      <h3>Three things to keep central</h3>
+      <p>First, confirm your project is non-research or exempt before you worry about tests, because your design follows from that. Second, define your outcome variable and its data type clearly, since that single decision drives most of the test choice. Third, prefer descriptive summaries and time-series charts when they answer your aim, and reserve inferential tests for when a genuine comparison is the point.</p>
+
+      <h3>References</h3>
+      <div class="refs">
+        <p>Johnston, H., Chung, C., Astrella, J., &amp; Grimm, S. (2023). Improving DNP student statistical competence: A faculty quality improvement initiative. <i>Nurse Educator, 48</i>(4), 229-230. https://doi.org/10.1097/NNE.0000000000001360</p>
+        <p>Koirala, B., &amp; Baptiste, D.-L. (2026). Just stats: T tests, analysis of variance tests, and nonparametric equivalents. <i>Journal for Nurse Practitioners, 22</i>(3), Article 105692. https://doi.org/10.1016/j.nurpra.2026.105692</p>
+        <p>U.S. Department of Health and Human Services, Office for Human Research Protections. (n.d.). <i>Quality improvement activities frequently asked questions.</i> Retrieved June 8, 2026, from https://www.hhs.gov/ohrp/regulations-and-policy/guidance/faq/quality-improvement-activities/index.html</p>
+        <p>Winckler, B., McKenzie, S., &amp; Lo, H.-Y. (2024). A practical guide to QI data analysis: Run and statistical process control charts. <i>Hospital Pediatrics, 14</i>(1), e83-e89. https://doi.org/10.1542/hpeds.2023-007296</p>
+        <p>Yoon, E., Tharakan, A., Johnson, C., Metz, C., &amp; Granger, B. B. (2025). Statistical process control charts to improve health care: Hypertension case. <i>AACN Advanced Critical Care, 36</i>(2), 197-204. https://doi.org/10.4037/aacnacc2025608</p>
+        <p style="text-indent:0;padding-left:0;font-size:13.5px;border-top:1px dashed var(--line);padding-top:12px">Regulatory definition of research referenced throughout: 45 CFR 46.102. DOIs above were verified at the time of creation. Confirm access and currency before citing them in your paper.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  Built as a teaching aid for practice improvement projects. Verify all determinations and analysis choices with your institution and a statistician when in doubt.
+</footer>
+
+<script>
+/* ---------- tab switching ---------- */
+document.querySelectorAll('nav.tabs button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById(b.dataset.tab).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+
+/* ---------- inline definitions ---------- */
+const TERMS={
+  'continuous':'A measurement on a numeric scale where the spacing between values is equal and meaningful, such as weight, blood pressure, or a summed score.',
+  'categorical':'A variable that sorts each case into a named group with no built-in order, such as yes or no.',
+  'ordinal':'A variable with a clear order but unequal or unknown spacing between values, such as a 1 to 5 rating.',
+  'dependent variable':'The outcome you measure and expect your intervention to affect.',
+  'parametric':'A test that assumes the outcome is continuous and roughly normally distributed, and compares means. The t test is the common example.',
+  'nonparametric':'A test that makes fewer assumptions and compares ranks or medians instead of means. The safer choice with small or skewed samples.',
+  'skewed':'A lopsided distribution, with a tail pulled toward the high or low end rather than being symmetric.',
+  'median':'The middle value when the data are ordered. Used instead of the mean for skewed or ordinal data.',
+  'standard deviation':'A measure of how spread out the values are around the mean.',
+  'interquartile range':'The middle 50 percent of the values. A spread measure usually reported with the median.',
+  'confidence interval':'A plausible range for the true effect. A narrower range means a more precise estimate.',
+  'effect size':'A number describing how large a difference is in practical terms, separate from whether it reached statistical significance.',
+  'Cohen d':'A common effect size for comparing two means, expressed in standard deviation units.',
+  'phi':'An effect size for a 2 by 2 categorical comparison (two groups, a yes or no outcome).',
+  'Cramer V':'An effect size for categorical comparisons that have more than two categories.',
+  'p value':'How surprising your result would be if nothing had truly changed. A small value suggests the difference is unlikely to be chance alone.',
+  'randomization':'Assigning participants to groups by chance, which balances out unknown differences. It is the defining feature of a true experiment.',
+  'pre-experimental':'A simple design with one group and no comparison group, such as measuring before and after. Easy to run, but weaker for showing that the intervention caused the change.',
+  'quasi-experimental':'A design with a comparison built in (a separate group, or repeated measures over time) but without random assignment.',
+  'experimental':'A design using random assignment and a control group. The strongest design for showing cause, and usually classified as research.',
+  'interrupted time series':'Measuring the outcome many times before and after a change to see whether the pattern shifts. Displayed with run or control charts.',
+  'run chart':'A graph of your measure plotted in time order against a median line, used to spot real shifts, trends, and runs.',
+  'control chart':'A run chart with statistically calculated limits, used to tell ordinary variation apart from a real signal. Also called an SPC or Shewhart chart.',
+  'common cause':'The normal, expected variation present in any stable process.',
+  'special cause':'Variation that signals something real has changed, beyond normal fluctuation.',
+  'paired-samples t test':'Compares the mean before and after within one group.',
+  'independent-samples t test':'Compares the means of two separate groups.',
+  'one-sample t test':'Compares one group mean against a single fixed target value.',
+  'one-way ANOVA':'Compares the means of three or more separate groups at once.',
+  'repeated-measures ANOVA':'Compares the means of one group across three or more time points.',
+  'Wilcoxon signed-rank test':'The rank-based alternative to the paired t test, for one group measured before and after.',
+  'Mann-Whitney U test':'The rank-based alternative to the independent t test, for two separate groups.',
+  'Kruskal-Wallis test':'The rank-based alternative to one-way ANOVA, for three or more groups.',
+  'Friedman test':'The rank-based alternative to repeated-measures ANOVA, for three or more time points in one group.',
+  'McNemar test':'Compares a yes or no outcome before and after in the same people.',
+  'chi-square test':'Tests whether a yes or no outcome differs between separate groups.',
+  'Fisher exact test':'Used in place of chi-square when group sizes or expected counts are very small.',
+  'binomial test':'Compares one observed proportion against a fixed target proportion.'
+};
+const GLOSS_ORDER=Object.keys(TERMS).sort((a,b)=>b.length-a.length);
+function escapeRe(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+function autoGloss(text){
+  if(!text) return text;
+  const tokens=[];
+  let out=text;
+  GLOSS_ORDER.forEach(phrase=>{
+    const re=new RegExp('\\b'+escapeRe(phrase)+'\\b','i');
+    out=out.replace(re,(m)=>{
+      const i=tokens.length;
+      tokens.push('<span class="term" data-def="'+TERMS[phrase].replace(/"/g,'&quot;')+'">'+m+'</span>');
+      return '\u0001'+i+'\u0001';
+    });
+  });
+  return out.replace(/\u0001(\d+)\u0001/g,(m,i)=>tokens[+i]);
+}
+/* tooltip element and handlers */
+const TIP=document.createElement('div');TIP.className='tip';TIP.style.display='none';document.body.appendChild(TIP);
+function showTip(el){
+  TIP.textContent=el.getAttribute('data-def');
+  TIP.style.display='block';
+  const r=el.getBoundingClientRect();
+  const tw=TIP.offsetWidth, th=TIP.offsetHeight;
+  let left=Math.min(window.innerWidth-tw-10, Math.max(10, r.left));
+  let top=r.bottom+8;
+  if(top+th>window.innerHeight-10) top=r.top-th-8;
+  TIP.style.left=left+'px';TIP.style.top=top+'px';
+}
+function hideTip(){TIP.style.display='none';}
+document.addEventListener('mouseover',e=>{const t=e.target.closest('.term');if(t)showTip(t);});
+document.addEventListener('mouseout',e=>{if(e.target.closest('.term'))hideTip();});
+document.addEventListener('click',e=>{
+  const t=e.target.closest('.term');
+  if(t){e.stopPropagation();if(TIP.style.display==='block'&&TIP.textContent===t.getAttribute('data-def')){hideTip();}else{showTip(t);}}
+  else{hideTip();}
+});
+window.addEventListener('scroll',hideTip,true);
+
+/* ---------- guided wizard ---------- */
+const state = {};            // gate, otype, compare, dist
+const history = [];          // step ids visited, for back button
+
+const STEPS = {
+  gate:{
+    label:'Start here . Is this a practice project?',
+    title:'Is this EBP or QI, or is it research?',
+    lead:'This decides everything that follows. If the aim is to improve care in your own setting, you are in practice improvement territory and the analysis should stay simple. If the aim is to create knowledge meant to apply to other settings, that is research and belongs in a different, IRB-reviewed process.',
+    key:'gate',
+    options:[
+      {v:'practice',t:'Improve care or a process in my own setting',d:'Implementing evidence or testing a change locally. This is EBP or QI. Continue.'},
+      {v:'research',t:'Produce findings meant to generalize to other settings',d:'A systematic investigation for generalizable knowledge. This is research.'}
+    ]
+  },
+  otype:{
+    label:'Your outcome measure',
+    title:'What kind of data is your main outcome?',
+    lead:'Pick the data type of your primary outcome, the dependent variable you will compare. This single choice drives most of the recommendation. If you have several outcomes, run the tool once per outcome.',
+    key:'otype',
+    options:[
+      {v:'cont',t:'Continuous number',d:'A value on a real scale, such as HbA1c, blood pressure, weight, length of stay, or a summed scale score.'},
+      {v:'cat',t:'Yes or no category',d:'Each case falls into one of two unordered groups, such as compliant or not, readmitted or not, fall or no fall.'},
+      {v:'ord',t:'Ordered rating',d:'An ordinal scale with rank but uneven spacing, such as a single Likert item or a 1 to 5 satisfaction rating.'},
+      {v:'rate',t:'A rate or count tracked over time',d:'A percentage or count measured repeatedly, such as monthly compliance percent or falls per 1000 patient-days.'}
+    ]
+  },
+  compare:{
+    label:'How your project is structured',
+    title:'How are you comparing things?',
+    lead:'Choose the comparison that matches your design. Keep it as simple as your aim allows.',
+    key:'compare',
+    options:[] // filled dynamically
+  },
+  dist:{
+    label:'Sample size and shape',
+    title:'How large is your sample, and is the outcome roughly symmetric?',
+    lead:'This decides whether the simple mean-based test is appropriate, or whether a rank-based alternative is safer. When in doubt with a small or skewed sample, the nonparametric choice is the cautious one.',
+    key:'dist',
+    options:[
+      {v:'param',t:'About 30 or more per group, and roughly symmetric',d:'A mean-based parametric test is reasonable.'},
+      {v:'nonparam',t:'Smaller than about 30, or clearly skewed, or has strong outliers',d:'Use the rank-based nonparametric alternative.'}
+    ]
+  },
+  rand:{
+    label:'Group assignment',
+    title:'Will the two groups be formed by random assignment?',
+    lead:'This is what separates a quasi-experimental design from a true experiment. In practice settings the groups are almost always formed without randomization, for example one unit or clinic compared with another.',
+    key:'rand',
+    options:[
+      {v:'norand',t:'No, the groups are formed without randomization',d:'For example, an intervention unit compared with a similar comparison unit. This is a quasi-experimental design and is the usual choice for practice projects.'},
+      {v:'rand',t:'Yes, participants are randomly assigned',d:'Random assignment plus a comparison group is a true experiment, which usually moves the project into generalizable research and full IRB review.'}
+    ]
+  }
+};
+
+/* comparison options depend on outcome type */
+function compareOptions(otype){
+  const base=[
+    {v:'prepost',t:'One group, measured before and after',d:'The same patients or units measured at two points. The most common practice-project design.'},
+    {v:'twogroup',t:'Two separate groups',d:'For example, an intervention unit compared with a comparison unit.'},
+    {v:'multi',t:'Three or more time points or groups',d:'Several measurement points over time, or three or more groups compared at once.'},
+    {v:'benchmark',t:'Compared against a fixed target or benchmark',d:'For example, comparing your result to a published standard or organizational goal.'},
+    {v:'describe',t:'Just describe the result, no formal comparison',d:'Summarize what happened. Often the right and sufficient choice.'}
+  ];
+  if(otype==='rate'){
+    return [
+      {v:'timeseries',t:'Track the measure over many time points',d:'Plot the rate or count over time. The standard QI approach.'},
+      {v:'prepost',t:'Collapse to a single before and after comparison',d:'Possible, but a time-series chart usually tells you more.'},
+      {v:'describe',t:'Just describe the rates',d:'Report the percentages or counts plainly.'}
+    ];
+  }
+  return base;
+}
+
+/* ---------- recommendation engine ---------- */
+function recommend(s){
+  const o=s.otype, c=s.compare, d=s.dist;
+
+  // process / time-series outcome
+  if(o==='rate' && c==='timeseries'){
+    return {
+      name:'Run chart, then a control chart as data grow',
+      sub:'Time-series display, the standard analytic approach for QI',
+      primary:'Run chart (median centerline)',
+      alt:'Move to a control chart (p-chart for a percentage, c-chart or u-chart for counts and rates) once you have roughly 15 to 20 points',
+      report:['Each data point plotted in time order','A median centerline (run chart) or mean with control limits (control chart)','Annotations marking when each change was made','Run-chart rules: a shift of 6 or more points on one side, a trend of 5 or more, or an unusually extreme point'],
+      tags:['No p value needed','Shows whether the change held','Separates real signal from noise'],
+      note:'This is usually the strongest and simplest analysis for a QI project. It directly shows whether your change produced a sustained improvement.'
+    };
+  }
+
+  // describe only
+  if(c==='describe'){
+    const map={
+      cont:'Means and standard deviations, with the range',
+      cat:'Frequencies and percentages',
+      ord:'Medians and interquartile range, plus frequencies',
+      rate:'Rates or percentages, shown over time where possible'
+    };
+    return {
+      name:'Descriptive statistics only',
+      sub:'No inferential test required',
+      primary:map[o],
+      alt:'Add a simple chart (bar chart, line over time) to make the pattern visible',
+      report:['A clear table of the summary numbers','Pre and post side by side where relevant','A short plain-language statement of the practical change'],
+      tags:['Simplest option','Fully defensible for many projects'],
+      note:'About one in five DNP projects use descriptive statistics alone. If your aim is to document a local change rather than test a hypothesis, this is appropriate and you do not need a p value.'
+    };
+  }
+
+  // continuous
+  if(o==='cont'){
+    if(c==='prepost') return wrap('Paired-samples t test','Wilcoxon signed-rank test',d,'cont','paired');
+    if(c==='twogroup') return wrap('Independent-samples t test','Mann-Whitney U test',d,'cont','indep');
+    if(c==='multi')   return wrap('One-way ANOVA (groups) or repeated-measures ANOVA (time points)','Kruskal-Wallis test (groups) or Friedman test (time points)',d,'cont','multi');
+    if(c==='benchmark') return {
+      name:'One-sample t test',sub:'Continuous outcome compared to a fixed value',
+      primary:'One-sample t test',alt:'If skewed or small: one-sample Wilcoxon (sign) test',
+      report:['Sample mean and standard deviation','The benchmark value tested against','Mean difference, 95% confidence interval, and p value','Effect size (Cohen d)'],
+      tags:['Compares your mean to a target'],note:'Use only when comparing your group mean to a single fixed standard.'
+    };
+  }
+
+  // categorical
+  if(o==='cat'){
+    if(c==='prepost') return {
+      name:'McNemar test',sub:'Paired yes or no outcome',
+      primary:'McNemar test',alt:'For very small numbers, an exact version of the McNemar test',
+      report:['A 2 by 2 table of before versus after status','Counts and percentages in each cell','The McNemar statistic and p value'],
+      tags:['Same patients counted twice'],
+      note:'Use this when the same individuals are classified yes or no before and after. If instead you tracked an aggregate monthly percentage, a run or control chart fits better.'
+    };
+    if(c==='twogroup') return {
+      name:'Chi-square test of independence',sub:'Yes or no outcome, two separate groups',
+      primary:'Chi-square test of independence',alt:'If any expected cell count is under 5: Fisher exact test',
+      report:['A contingency table of group by outcome','Counts and percentages','Chi-square (or Fisher) statistic and p value','Effect size (phi or Cramer V)'],
+      tags:['Two independent groups'],note:'Check expected counts. Small cells push you to the Fisher exact test.'
+    };
+    if(c==='multi') return {
+      name:'Chi-square test',sub:'Yes or no outcome across three or more groups',
+      primary:'Chi-square test of independence',alt:'If expected counts are small: Fisher exact test',
+      report:['A contingency table of group by outcome','Counts and percentages','Chi-square statistic and p value','Effect size (Cramer V)'],
+      tags:['Three or more groups'],note:'Same logic as the two-group case, extended across more groups.'
+    };
+    if(c==='benchmark') return {
+      name:'One-sample proportion test',sub:'A single percentage compared to a target',
+      primary:'One-sample proportion test (z) or binomial test',alt:'The exact binomial test for small samples',
+      report:['Observed proportion and sample size','The benchmark proportion','Test statistic, 95% confidence interval, and p value'],
+      tags:['Your rate vs a target'],note:'Use when comparing one observed percentage to a fixed standard.'
+    };
+  }
+
+  // ordinal
+  if(o==='ord'){
+    if(c==='prepost') return ordinal('Wilcoxon signed-rank test','one group before and after');
+    if(c==='twogroup') return ordinal('Mann-Whitney U test','two separate groups');
+    if(c==='multi')   return ordinal('Kruskal-Wallis test (groups) or Friedman test (repeated time points)','three or more groups or time points');
+    if(c==='benchmark') return {
+      name:'Compare medians to the target',sub:'Ordinal outcome versus a fixed value',
+      primary:'Report the median and interquartile range against the target',alt:'A one-sample sign test if a formal test is needed',
+      report:['Median and interquartile range','The target value','Plain statement of where the group sits relative to the target'],
+      tags:['Ordinal vs a target'],note:'Ordinal data are summarized with medians, not means.'
+    };
+  }
+
+  // fallback (rate collapsed to prepost)
+  if(o==='rate' && c==='prepost'){
+    return {
+      name:'Compare two proportions, but consider a chart instead',sub:'Rate collapsed to a single before and after',
+      primary:'Chi-square or McNemar test on the proportion, depending on whether the same units are counted twice',
+      alt:'Strongly consider a run chart instead, which shows whether the change held',
+      report:['Before and after percentages with counts','The test statistic and p value if used','A note on why a single comparison may understate or overstate a process change'],
+      tags:['A chart usually tells you more'],
+      note:'Collapsing a tracked rate into one before-and-after number throws away the time pattern. A run chart is usually the better choice.'
+    };
+  }
+
+  return null;
+}
+
+function wrap(primary,alt,d,otype,kind){
+  const useAlt = d==='nonparam';
+  const names={paired:'one group before and after',indep:'two separate groups',multi:'three or more groups or time points'};
+  return {
+    name: useAlt? alt : primary,
+    sub:'Continuous outcome, '+names[kind]+(useAlt?', small or skewed sample':', adequate and symmetric sample'),
+    primary: useAlt? alt : primary,
+    alt: useAlt? ('If your sample were larger and symmetric: '+primary) : ('If the outcome is skewed or the sample is small: '+alt),
+    report: useAlt
+      ? ['Medians and interquartile range for each condition','The test statistic and p value','An effect size (r) where available']
+      : ['Means and standard deviations for each condition','Mean difference with its 95% confidence interval','The test statistic and p value','An effect size (Cohen d, or eta-squared for ANOVA)'],
+    tags: useAlt? ['Rank-based','Robust to skew and small n'] : ['Mean-based','Simple and widely understood'],
+    note: useAlt
+      ? 'With small or skewed data the rank-based test protects you from misleading results. Report the confidence interval and effect size, since a real change can still miss significance at small n.'
+      : 'This is the simplest defensible choice for your situation. Still report the confidence interval and effect size, not the p value alone.'
+  };
+}
+function ordinal(test,structure){
+  return {
+    name:test,sub:'Ordinal outcome, '+structure,
+    primary:test,alt:'Ordinal data are always handled with rank-based tests, so there is no parametric alternative here',
+    report:['Median and interquartile range for each condition','Frequencies across the rating levels','The test statistic and p value','An effect size (r) where available'],
+    tags:['Rank-based','Correct for ordered ratings'],
+    note:'Treat ordered ratings as ordinal and summarize them with medians. Avoid reporting a mean of a single Likert item as if it were continuous.'
+  };
+}
+
+/* ---------- design engine ---------- */
+function designFor(s){
+  const o=s.otype, c=s.compare, r=s.rand;
+  if(c==='describe') return {name:'Descriptive design', def:'You observe and summarize one group at one or more points, without manipulating anything or comparing against a separate group. Appropriate when the aim is to document current practice or an outcome.'};
+  if(c==='timeseries' || (c==='multi' && o==='rate')) return {name:'Interrupted time series design (quasi-experimental)', def:'You measure the outcome repeatedly before and after a change and look for a shift in the pattern. Displayed as a run or control chart, this is one of the strongest non-randomized designs for showing that a change actually took hold.'};
+  if(c==='prepost') return {name:'One-group pretest-posttest design (pre-experimental)', def:'You measure one group before and after the change, with no comparison group. This is the most common practice-project design. It is simple, but it cannot rule out other explanations for a change, so interpret the result modestly.'};
+  if(c==='twogroup'){
+    if(r==='rand') return {name:'Experimental design (randomized controlled trial)', def:'Participants are randomly assigned to intervention or comparison. Random assignment plus a comparison group is the hallmark of a true experiment, which usually shifts the work into generalizable research requiring full IRB review. If the aim is local improvement, consider a quasi-experimental design instead.', flag:true};
+    return {name:'Quasi-experimental, nonequivalent comparison group design', def:'You compare an intervention group with a separate comparison group that was not randomly assigned. Stronger than a single group because it gives you something to compare against, while staying feasible in a practice setting.'};
+  }
+  if(c==='multi') return {name:'Multi-group or repeated-measures comparison (quasi-experimental or comparative)', def:'If your three or more points are spread over time, this is an interrupted time series. If they are separate groups measured once, it is a multi-group comparative design. Neither uses randomization, so it stays quasi-experimental or descriptive.'};
+  if(c==='benchmark') return {name:'Benchmark comparison (descriptive or pre-experimental)', def:'You compare your group against a fixed external standard or organizational target rather than against a concurrent comparison group.'};
+  return {name:'Descriptive design', def:'Summarize what you observed.'};
+}
+
+/* ---------- methods summary generator ---------- */
+function artic(name){
+  if(/^one\b/i.test(name)) return 'a';
+  return /^[aeiou]/i.test(name) ? 'an' : 'a';
+}
+function methodPhrase(name){
+  const proper=['McNemar','Mann-Whitney','Wilcoxon','Fisher','ANOVA','Friedman','Kruskal'];
+  if(proper.some(p=>name.startsWith(p))) return name;
+  return name.charAt(0).toLowerCase()+name.slice(1);
+}
+function summaryFor(s){
+  const o=s.otype, c=s.compare, r=s.rand, dist=s.dist;
+  const d=designFor(s);
+  const rec=recommend(s);
+  const otp={cont:'a continuous variable',cat:'a dichotomous categorical variable (yes or no)',ord:'an ordinal variable',rate:'a rate or proportion measured repeatedly over time'}[o];
+  const P=[];
+
+  // framing
+  if(d.flag){
+    P.push(`This project uses ${artic(d.name)} ${d.name.toLowerCase()} to evaluate [intervention] for [process or outcome] within [setting]. Because the design includes random assignment to groups, it will likely be classified as research and should be submitted for full institutional review board review before implementation. If the intent is local practice improvement, consider a quasi-experimental design instead.`);
+  } else {
+    P.push(`This [EBP or QI] project uses ${artic(d.name)} ${d.name.toLowerCase()} to improve [process or outcome] within [setting]. Because the aim is local practice improvement rather than the development of generalizable knowledge, the project is expected to meet criteria for a non-research or exempt determination, with the final determination made by the reviewing institutional review board.`);
+  }
+
+  // variable + comparison
+  let comp='';
+  if(c==='prepost') comp='measured in a single group before and after the intervention';
+  else if(c==='twogroup') comp=(r==='rand'?'compared between a randomly assigned intervention group and a control group':'compared between an intervention group and a separate, nonrandomized comparison group');
+  else if(c==='multi') comp='compared across three or more time points or groups';
+  else if(c==='benchmark') comp='compared against an established benchmark or organizational target';
+  else if(c==='timeseries') comp='measured repeatedly across multiple time points before and after the intervention';
+  else comp='summarized for the sample without a formal comparison';
+  P.push(`The primary outcome, [outcome variable], is operationalized as ${otp} and is ${comp} (anticipated N = [enter sample size]).`);
+
+  // analysis
+  let reportClause;
+  if(o==='cont') reportClause='Descriptive statistics (means and standard deviations) will summarize the sample, and the effect size (Cohen d) along with the 95% confidence interval will be reported alongside the test result, so that the practical size of any change is clear.';
+  else if(o==='cat') reportClause='Frequencies and percentages will summarize the sample, and an effect size (phi or Cramer V) will be reported alongside the test result.';
+  else if(o==='ord') reportClause='Medians and interquartile ranges will summarize the sample, and an effect size (r) will be reported alongside the test result.';
+  else reportClause='Rates or percentages will be summarized before and after, and the practical size of the change will be described.';
+
+  let analysis='';
+  if(c==='timeseries'){
+    analysis='Data will be plotted on a run chart with a median centerline and interpreted using established run-chart rules (a shift of six or more consecutive points on one side of the median, a trend of five or more points, or an unusually extreme point). As additional data points accumulate (approximately 15 to 20), a control chart will be used to distinguish common cause from special cause variation.';
+  } else if(c==='describe'){
+    analysis=`Data will be summarized using descriptive statistics (${rec.primary.charAt(0).toLowerCase()+rec.primary.slice(1)}). No inferential test is planned, because the aim is to describe the outcome rather than to test a hypothesis.`;
+  } else {
+    let altClause='';
+    if(o==='cont') altClause = (dist==='nonparam')
+      ? ' This rank-based test is selected because the sample is small or the outcome is skewed.'
+      : ' If the assumption of normality is not met, the equivalent nonparametric test will be used instead.';
+    else if(o==='cat' && c!=='prepost') altClause=' If any expected cell count is below five, the Fisher exact test will be used instead.';
+    analysis=`Data will be analyzed using the ${methodPhrase(rec.primary)}.${altClause} ${reportClause}`;
+  }
+  P.push(analysis);
+
+  // limitation
+  let lim='';
+  if(c==='prepost') lim='As a single-group design without a comparison group, observed changes cannot be attributed to the intervention with certainty, and results should be interpreted accordingly.';
+  else if(c==='twogroup' && r==='rand') lim='Random assignment strengthens causal interpretation. Note that a randomized design typically constitutes research and requires full institutional review board review.';
+  else if(c==='twogroup') lim='Because participants are not randomly assigned, preexisting differences between the groups may influence the results and should be considered when interpreting the findings.';
+  else if(c==='timeseries') lim='Time-series analysis shows whether a change occurred and was sustained, but cannot by itself establish that the intervention caused the change.';
+  else if(c==='benchmark') lim='Comparison to a fixed benchmark does not account for concurrent changes in the setting and should be read as a gauge against a standard rather than as a controlled comparison.';
+  if(lim) P.push(lim);
+
+  return P.join('\n\n');
+}
+
+/* ---------- rendering ---------- */
+function renderCrumbs(){
+  const c=document.getElementById('crumbs');
+  c.innerHTML='';
+  const labels={
+    gate:{practice:'EBP or QI project',research:'Research'},
+    otype:{cont:'Continuous outcome',cat:'Yes or no outcome',ord:'Ordinal outcome',rate:'Rate over time'},
+    compare:{prepost:'Before and after',twogroup:'Two groups',multi:'Three or more',benchmark:'Vs benchmark',describe:'Describe only',timeseries:'Tracked over time'},
+    rand:{norand:'No randomization',rand:'Randomized'},
+    dist:{param:'Adequate symmetric sample',nonparam:'Small or skewed sample'}
+  };
+  ['gate','otype','compare','rand','dist'].forEach(k=>{
+    if(state[k]!==undefined && labels[k] && labels[k][state[k]]){
+      const span=document.createElement('span');
+      span.className='crumb';
+      span.innerHTML=labels[k][state[k]];
+      c.appendChild(span);
+    }
+  });
+}
+
+function renderStep(id){
+  renderCrumbs();
+  document.getElementById('back').style.display = history.length? 'inline-block':'none';
+
+  // research dead-end
+  if(id==='gate-research'){
+    document.getElementById('steps').innerHTML=`
+      <div class="card">
+        <span class="step-label">This tool is not the right fit</span>
+        <h2>That sounds like research, not a practice project</h2>
+        <p class="lead">If your aim is to generate knowledge meant to generalize beyond your setting, your project needs your IRB's research review and a research design, not this simplified aid. Two things worth keeping in mind:</p>
+        <div class="warnbox" style="background:var(--teal-tint);border-color:#bcd9d5;border-left-color:var(--teal);color:var(--ink-soft)">
+          Planning to publish does not, on its own, make your project research. People publish QI work all the time. What matters is whether the project is designed to produce generalizable knowledge. And the determination of research versus non-research is made by your IRB or institution, not by you. If your real aim is local improvement, step back and reframe it, then start over here.
+        </div>
+        <div class="btn-row"><button class="btn" id="reconsider">It is actually local improvement, restart</button></div>
+      </div>`;
+    document.getElementById('reconsider').addEventListener('click',restart);
+    return;
+  }
+
+  const step=STEPS[id];
+  if(id==='compare') step.options=compareOptions(state.otype);
+
+  // skip dist step when not needed
+  const html=`
+    <div class="card">
+      <span class="step-label">${step.label}</span>
+      <h2>${step.title}</h2>
+      <p class="lead">${autoGloss(step.lead)}</p>
+      <p class="termhint">Tip: tap or hover any underlined term for a plain-language definition.</p>
+      <div class="opts ${step.options.length===2?'two':''}">
+        ${step.options.map(o=>`<button class="opt" data-v="${o.v}">
+            <span class="ot">${o.t}</span><span class="od">${autoGloss(o.d)}</span>
+          </button>`).join('')}
+      </div>
+    </div>`;
+  document.getElementById('steps').innerHTML=html;
+
+  document.querySelectorAll('#steps .opt').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      state[step.key]=btn.dataset.v;
+      advance(id,btn.dataset.v);
+    });
+  });
+}
+
+function advance(fromId,val){
+  history.push(fromId);
+  if(fromId==='gate'){
+    if(val==='research'){ renderStep('gate-research'); return; }
+    renderStep('otype'); return;
+  }
+  if(fromId==='otype'){ renderStep('compare'); return; }
+  if(fromId==='compare'){
+    if(val==='twogroup'){ renderStep('rand'); return; }
+    // distribution question only for continuous mean-based comparisons
+    const needsDist = state.otype==='cont' && ['prepost','multi'].includes(val);
+    if(needsDist){ renderStep('dist'); return; }
+    renderResult(); return;
+  }
+  if(fromId==='rand'){
+    if(state.otype==='cont'){ renderStep('dist'); return; }
+    renderResult(); return;
+  }
+  if(fromId==='dist'){ renderResult(); return; }
+}
+
+function renderResult(){
+  renderCrumbs();
+  document.getElementById('back').style.display='inline-block';
+  const r=recommend(state);
+  if(!r){ document.getElementById('steps').innerHTML='<div class="card">Something did not map. Please start over.</div>'; return; }
+  const d=designFor(state);
+
+  document.getElementById('steps').innerHTML=`
+    <div class="card" style="border-left:5px solid var(--clay)">
+      <span class="step-label" style="color:var(--clay)">Recommended design</span>
+      <h2 style="font-size:22px;margin-bottom:6px">${autoGloss(d.name)}</h2>
+      <p class="lead" style="margin-bottom:0">${autoGloss(d.def)}</p>
+      ${d.flag?`<div class="warnbox" style="margin-top:14px"><b>Heads up.</b> ${autoGloss('A randomized controlled trial usually counts as research rather than practice improvement. If your intent is local improvement, a quasi-experimental nonequivalent comparison group design gives you a comparison while keeping the project feasible and typically non-research.')}</div>`:''}
+    </div>
+    <div class="result-head">
+      <div class="rk">Recommended analysis</div>
+      <h2>${r.name}</h2>
+      <div class="rsub">${r.sub}</div>
+    </div>
+    <div class="card">
+      <div class="rgrid">
+        <div class="rbox">
+          <h4>Use this</h4>
+          <p><span class="big">${autoGloss(r.primary)}</span></p>
+          <div style="margin-top:8px">${r.tags.map(t=>`<span class="pill">${t}</span>`).join('')}</div>
+        </div>
+        <div class="rbox">
+          <h4>Alternative</h4>
+          <p>${autoGloss(r.alt)}</p>
+        </div>
+      </div>
+      <div class="rbox" style="margin-top:16px">
+        <h4>What to report</h4>
+        <ul class="reportlist">${r.report.map(x=>`<li>${autoGloss(x)}</li>`).join('')}</ul>
+      </div>
+      <div class="warnbox"><b>Keep it simple, and keep it honest.</b> ${autoGloss(r.note)}</div>
+    </div>
+    <div class="card">
+      <span class="step-label">Draft methods summary</span>
+      <h2 style="font-size:21px;margin-bottom:6px">Design and analysis summary</h2>
+      <p class="lead">Edit the bracketed placeholders to fit your project, then copy this into your methods section. It is written in proposal tense and is a starting draft, not a finished methods section.</p>
+      <textarea id="summaryText" class="summary" spellcheck="false">${summaryFor(state)}</textarea>
+      <div class="btn-row" style="margin-top:12px"><button class="btn" id="copyBtn">Copy text</button></div>
+    </div>`;
+
+  const ta=document.getElementById('summaryText');
+  if(ta){
+    ta.style.height='auto';
+    ta.style.height=(ta.scrollHeight+6)+'px';
+    document.getElementById('copyBtn').addEventListener('click',()=>{
+      ta.select();
+      try{ document.execCommand('copy'); }catch(e){}
+      if(navigator.clipboard){ navigator.clipboard.writeText(ta.value).catch(()=>{}); }
+      const b=document.getElementById('copyBtn');
+      b.textContent='Copied'; setTimeout(()=>{b.textContent='Copy text';},1500);
+    });
+  }
+}
+
+/* ---------- nav buttons ---------- */
+function restart(){
+  for(const k in state) delete state[k];
+  history.length=0;
+  renderStep('gate');
+}
+document.getElementById('restart').addEventListener('click',restart);
+document.getElementById('back').addEventListener('click',()=>{
+  const prev=history.pop();
+  if(prev===undefined){ restart(); return; }
+  // clear forward state
+  const order=['gate','otype','compare','rand','dist'];
+  const idx=order.indexOf(prev);
+  order.slice(idx).forEach(k=>{ delete state[STEPS[k]?STEPS[k].key:k]; });
+  if(prev==='gate-research'){ renderStep('gate'); return; }
+  renderStep(prev);
+});
+
+/* init */
+renderStep('gate');
+</script>
+</body>
+</html>
